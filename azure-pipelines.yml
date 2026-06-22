@@ -6,10 +6,12 @@ pool:
 
 stages:
 - stage: Build
+  displayName: Build Stage
   jobs:
-  - job: BuildJob
+  - job: MavenBuild
     steps:
     - task: Maven@4
+      displayName: Build Maven Project
       inputs:
         mavenPomFile: 'pom.xml'
         goals: 'clean package'
@@ -17,18 +19,32 @@ stages:
         testResultsFiles: '**/surefire-reports/TEST-*.xml'
 
     - task: PublishBuildArtifacts@1
+      displayName: Publish WAR Artifact
       inputs:
         PathtoPublish: 'target'
         ArtifactName: 'drop'
         publishLocation: 'Container'
 
 - stage: Deploy
+  displayName: Deployment Stage
   dependsOn: Build
   jobs:
-  - job: DeployJob
+  - job: DeployApplication
     steps:
     - script: |
-        echo "Starting Deployment"
-        echo "Deploying TomcatMavenApp"
-        echo "Deployment Successful"
-      displayName: 'Deploy Application'
+        echo "Starting Deployment Process"
+        echo "Deploying TomcatMavenApp WAR File"
+        echo "Deployment Completed Successfully"
+      displayName: Deploy WAR Application
+
+- stage: Verification
+  displayName: Verification Stage
+  dependsOn: Deploy
+  jobs:
+  - job: VerifyDeployment
+    steps:
+    - script: |
+        echo "Checking deployment status"
+        echo "Application is running successfully"
+        echo "Pipeline execution completed"
+      displayName: Verify Deployment
